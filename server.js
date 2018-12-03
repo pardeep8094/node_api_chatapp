@@ -2,9 +2,10 @@ var express = require('express');
 app = express();
 port = process.env.PORT || 8080;
 mongoose = require('mongoose');
-groups = require('./api/models/groupModel');
+groups = require('./api/models/groupsModel');
 customers = require('./api/models/customersModel');
 chats = require('./api/models/chatsModel');
+messages = require('./api/models/messagesModel');
 
 bodyParser = require('body-parser');
 

@@ -2,9 +2,10 @@ module.exports = function(app) {
   // var user = require('../controllers/userController');
   // var chat = require('../controllers/chatController');
   // var message = require('../controllers/messageController');
-var groups = require('../controllers/groupController');
+var groups = require('../controllers/groupsController');
 var customers = require('../controllers/customersController');
 var chats = require('../controllers/chatsController');
+var messages = require('../controllers/messagesController');
 
 // app.route('/group')
 //     .get(groups.getGroupDetails);
@@ -53,6 +54,8 @@ app.route('/customer/:id')
 app.route('/chats')
     .get(chats.getChats);
 
+app.route('/messages')
+    .get(messages.getAllMessages);
 
     
 };
