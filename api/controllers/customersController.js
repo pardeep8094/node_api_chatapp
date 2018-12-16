@@ -6,7 +6,6 @@ const uuidv1 = require('uuid/v1');
 // re.body is used in post api call
 
 exports.getCustomers = function(req, res, next) {
-	console.log("jai shree ram ji");
 	customerData.find({}, function(err, groups) {
 		if(err)
 			return res.json(err);
@@ -15,7 +14,6 @@ exports.getCustomers = function(req, res, next) {
 }
 
 exports.getCustomerDetails = function(req, res, next) {
-	console.log("jai shree ram ji");
 	customerData.find({
 		_id : mongoose.Types.ObjectId(req.params.id)
 	}, function(err, groups) {
@@ -26,9 +24,30 @@ exports.getCustomerDetails = function(req, res, next) {
 	})
 }
 
+exports.getCustomerInfo = function(req, res, next) {
+	customerData.find({
+		_id : mongoose.Types.ObjectId(req.params.id)
+	},{
+		name : 1,
+		profile_image : 1
+	}, function(err, groups) {
+		if(err) {
+			return res.json(err);
+		}
+		if(groups[0]) {
+			// res.json(groups);
+			return  res.json({
+				"customer_id" : groups[0]._id,
+				"name" : groups[0].name,
+				"image" : groups[0].profile_image
+			});
+		} else {
+			res.json(error.dataNotFound());
+		}
+	})
+}
+
 exports.createCustomer = function(req, res, next) {
-	console.log("jai shree ram");
-	console.log("jai hanuman ji");
 	var ObjectId = require('mongodb').ObjectID
 	var id = new ObjectId();
 
@@ -45,8 +64,6 @@ exports.createCustomer = function(req, res, next) {
 }
 
 exports.updateManyCustomerDetails = function(req, res, next) {
-	console.log("jai shree ram ji");
-
 	customerData.updateMany({name: req.params.id}, {$set:req.body}, 
 		function(err, groups) {
 			if(err) {
@@ -57,8 +74,6 @@ exports.updateManyCustomerDetails = function(req, res, next) {
 }
 
 exports.updateCustomerDetails = function(req, res, next) {
-	console.log("jai shree ram ji");
-
 	customerData.update({_id: req.params.id}, {$set:req.body}, 
 		function(err, groups) {
 			if(err) {
@@ -70,7 +85,6 @@ exports.updateCustomerDetails = function(req, res, next) {
 
 
 exports.deleteCustomer = function(req, res, next) {
-	console.log("jai shree ram");
 	console.log(req.params.id);
 	customerData.remove({
 		_id: req.params.id

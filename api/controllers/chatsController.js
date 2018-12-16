@@ -1,10 +1,24 @@
 var mongoose = require('mongoose');
-groupData = mongoose.model('chats');
+chatData = mongoose.model('chats');
 
 exports.getChats = function(req, res, next) {
-	groupData.find({}, function(err, groups1) {
+	chatData.find({}, function(err, chates1) {
 		if(err)
 			return res.json(err);
-		res.json(groups1);
+		res.json(chates1);
+	})
+}
+
+
+// use in array for find data in database
+// params(array) in database
+exports.getChat = function(req, res, next) {
+	chatData.find({
+		_id : mongoose.Types.ObjectId(req.params.id)
+	}, function(err, chates1) {
+		if(err) {
+			return res.json(err);
+		}
+		res.json(chates1);
 	})
 }

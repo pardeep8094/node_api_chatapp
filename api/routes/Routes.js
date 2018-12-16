@@ -7,9 +7,7 @@ var customers = require('../controllers/customersController');
 var chats = require('../controllers/chatsController');
 var messages = require('../controllers/messagesController');
 
-// app.route('/group')
-//     .get(groups.getGroupDetails);
-
+/////////////////////// customer api list ////////////////////////
 app.route('/customers')
     .get(customers.getCustomers);
 
@@ -21,8 +19,35 @@ app.route('/customer/:id')
     .put(customers.updateCustomerDetails)
     .delete(customers.deleteCustomer);
 
-// app.route('/customer/:id')
-//     .get(customers.getCustomerDetails);
+app.route('/customerinfo/:id')
+    .get(customers.getCustomerInfo)
+/////////////////////// groups api list ////////////////////////
+app.route('/groups')
+    .get(groups.getGroups);
+
+app.route('/group/:id')    
+    .get(groups.getGroupInfo);
+
+app.route('/getGroupParticipantInfo/:id')    
+    .get(groups.getGroupParticipantInfo);
+/////////////////////// chates api list //////////////////////////
+app.route('/chats')
+    .get(chats.getChats);
+
+app.route('/chat/:id')    
+    .get(chats.getChat);
+
+
+// messages Api List
+app.route('/messages')
+    .get(messages.getAllMessages);
+
+app.route('/message/:id')    
+    .get(messages.getMessage);
+
+app.route('/chat/:id/messages')    
+    .get(messages.getChatmessages);
+
 
 // app.route('/customerupdate/:id')
 //     .put(customers.updateCustomerDetails);
@@ -46,16 +71,10 @@ app.route('/customer/:id')
   //   .delete(chat.deleteChat);
 
   // app.route('/chat/:id/deleteMessages') 
-  //   .delete(chat.deleteMessages);	
+  //   .delete(chat.deleteMessages);  
 
   // app.route('/message/:messageId')
   //   .get(message.getAllMessage);
-
-app.route('/chats')
-    .get(chats.getChats);
-
-app.route('/messages')
-    .get(messages.getAllMessages);
 
     
 };
