@@ -1,6 +1,7 @@
 var mongoose = require('mongoose');
 customerData = mongoose.model('customers');
 const uuidv1 = require('uuid/v1');
+var error = require('./errors.js');
 
 // req.params value is set when calling get api call
 // re.body is used in post api call
