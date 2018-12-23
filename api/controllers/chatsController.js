@@ -24,92 +24,130 @@ exports.getChat = function(req, res, next) {
 		res.json(chates1);
 	})
 }
+	
 
 exports.getCustomerChatInfo = function(req, res, next) {
-	console.log("JAI SHREE RAM");
-	var chatWithData;
-    var callback = function(data){
-       	messagesData.findOne({
-			_id : mongoose.Types.ObjectId(data[0].last_message_id)
-		},{
-			message_body : 1,
-			_id : 0
-		},function(err, chatMessage) {
-			if(err || !chatMessage) {
-				return res.json(err);
-			}
-			// res.json(chatMessage);
-			data[0].last_message = chatMessage.message_body;
-			res.json(data);
-		});
-    };
+	var promisesArray = [];
+	var chatForCustomerArr = [];
+    /////////////////////   doAsyncTask calling   //////////////////////////////
+	function doAsyncTask(chatId) {
+		return new Promise(function(resolve, reject) {
+	 		chatData.findOne({
+				_id : mongoose.Types.ObjectId(chatId)
+			}, function(err, chatDetails) {
+				if(err || !chatDetails) {
+					reject('fail');
+				}
 
-	chatData.findOne({
-		_id : mongoose.Types.ObjectId(req.params.chatid)
-	}, function(err, chat) {
-		if(err || !chat) {
+				if (chatDetails.is_group) {
+					// getChatWithGroup
+					// getting group info
+					groupData.findOne({
+							_id : mongoose.Types.ObjectId(chatDetails.group_id)
+						},{
+							title : 1, 
+							image : 1,
+							members : 1
+						},function(err, groups) {
+							if(err || !groups) {
+								reject('fail');
+							}
+							// getting last message
+							messagesData.findOne({
+								_id : mongoose.Types.ObjectId(chatDetails.last_message_id)
+							},{
+								message_body : 1,
+								_id : 0
+							},function(err, chatMessage) {
+								if(err || !chatMessage) {
+									reject('fail');
+								}
+								chatForCustomerArr.push({
+									"chat_id" : chatDetails._id,
+									"is_group" : true,
+									"chat_with_data" : {
+										"group_id" : groups._id,
+										"name" : groups.title,
+										"image" : groups.image,
+										"totalMembers" : groups.members.length
+									},
+									"last_message_id" : chatDetails.last_message_id,
+									"last_message" : {
+										"message_body" : chatMessage.message_body,
+										"message_time" : "" // chatMessage..time).getHours()
+									}
+								});
+								resolve('done'); 
+							});
+						});
+				} else {
+					// getChatWithCustomers
+				 	memberArray = chatDetails.members;
+		            indexOfRemoveElement = (memberArray .indexOf(req.params.customerid));
+		            memberArray.splice(indexOfRemoveElement,1);
+		            // getting customer info
+		            // console.log(memberArray);
+					customerData.findOne({
+						_id : mongoose.Types.ObjectId(memberArray[0])
+					},{
+						name : 1,
+						profile_image : 1
+					}, function(err, customer) {
+						if(err || !customer) {
+							reject('fail');
+						}
+						// getting last message
+						messagesData.findOne({
+							_id : mongoose.Types.ObjectId(chatDetails.last_message_id)
+						},{
+							message_body : 1,
+							_id : 0
+						},function(err, chatMessage) {
+							if(err || !chatMessage) {
+								reject('fail');
+							}
+							chatForCustomerArr.push({
+								"chat_id" : chatDetails._id,
+								"is_group" : false,
+								"chat_with_data" : {
+									"customer_id" : customer._id,
+									"name" : customer.name,
+									"image" : customer.profile_image
+								},
+								"last_message_id" : chatDetails.last_message_id,
+								"last_message" : {
+									"message_body" : chatMessage.message_body,
+									"message_time" : "" // chatMessage..time).getHours()
+								}
+							});
+							resolve('done'); 
+						});	
+					})
+				}
+				});			
+			});		
+	}
+	// end doAsyncTask function calling
+
+	customerData.findOne({
+		_id : mongoose.Types.ObjectId(req.params.customerid)
+	},function(err, customerChats) {
+		if(err || !customerChats) {
 			return res.json(err);
 		}
-		if (chat.is_group) {
-			// getChatWithGroup
-			// getting group info
-			groupData.findOne({
-					_id : mongoose.Types.ObjectId(chat.group_id)
-				},{
-					title : 1, 
-					image : 1,
-					members : 1
-				},function(err, groups) {
-					if(err || !groups) {
-						return res.json(err);
-					}
-					chatWithData = [
-						{
-							"chat_id" : chat._id,
-							"is_group" : true,
-							"chat_with_data" : {
-								"group_id" : groups._id,
-								"name" : groups.title,
-								"image" : groups.image,
-								"totalMembers" : groups.members.length
-							},
-							"last_message_id" : chat.last_message_id,
-							"last_message" : ""
-						}
-					];
-					callback(chatWithData);
+		customerChats.chat_ids.forEach(function(chatId) {
+	 		promisesArray.push(doAsyncTask(chatId));
+		});	
+		Promise
+			.all(promisesArray)
+			.then(function(value) {
+				return res.json({
+					"id" : req.params.customerid,
+					"last_seen" : customerChats.last_seen,
+					"name" : customerChats.name,
+					"profile_image" : customerChats.profile_image,
+					"chat_list" : chatForCustomerArr	
 				});
-		} else {
-			// getChatWithCustomers
-		 	memberArray = chat.members;
-            indexOfRemoveElement = (memberArray .indexOf(req.params.customerid));
-            memberArray.splice(indexOfRemoveElement,1);
-            // getting customer info
-            // console.log(memberArray);
-			customerData.findOne({
-				_id : mongoose.Types.ObjectId(memberArray[0])
-			},{
-				name : 1,
-				profile_image : 1
-			}, function(err, customer) {
-				if(err || !customer) {
-					return res.json(err);
-				}
-					chatWithData = [
-						{
-							"chat_id" : chat._id,
-							"is_group" : false,
-							"chat_with_data" : {
-								"customer_id" : customer._id,
-								"name" : customer.name,
-								"image" : customer.profile_image
-							},
-							"last_message_id" : chat.last_message_id,
-							"last_message" : ""
-						}
-					];
-					callback(chatWithData);
-			})
-		}
-	})
+			});
+	});
 }

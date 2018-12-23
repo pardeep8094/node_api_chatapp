@@ -42,7 +42,6 @@ exports.getGroupInfo = function(req, res, next) {
 }
 
 exports.getGroupParticipantInfo = function(req, res, next) {
-	console.log("JAI SHREE RAM");
 	groupData.find({
 		_id : mongoose.Types.ObjectId(req.params.id)
 	}, function(err, groups) {

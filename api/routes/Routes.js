@@ -37,7 +37,7 @@ app.route('/chats')
 app.route('/chat/:id')    
     .get(chats.getChat);
 
-app.route('/chatinfo/:chatid/:customerid')    
+app.route('/chatinfo/:customerid')    
     .get(chats.getCustomerChatInfo);
 
 // messages Api List
