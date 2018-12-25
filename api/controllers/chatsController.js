@@ -53,32 +53,51 @@ exports.getCustomerChatInfo = function(req, res, next) {
 								reject('fail');
 							}
 							// getting last message
-							messagesData.findOne({
-								_id : mongoose.Types.ObjectId(chatDetails.last_message_id)
-							},{
-								message_body : 1,
-								_id : 0
-							},function(err, chatMessage) {
-								if(err || !chatMessage) {
-									reject('fail');
-								}
-								chatForCustomerArr.push({
-									"chat_id" : chatDetails._id,
-									"is_group" : true,
-									"chat_with_data" : {
-										"group_id" : groups._id,
-										"name" : groups.title,
-										"image" : groups.image,
-										"totalMembers" : groups.members.length
-									},
-									"last_message_id" : chatDetails.last_message_id,
-									"last_message" : {
-										"message_body" : chatMessage.message_body,
-										"message_time" : "" // chatMessage..time).getHours()
-									}
+							// messagesData.findOne({
+							// 	_id : mongoose.Types.ObjectId(chatDetails.last_message_id)
+							// },{
+							// 	message_body : 1,
+							// 	_id : 0
+							// },function(err, chatMessage) {
+							// 	if(err || !chatMessage) {
+							// 		reject('fail');
+							// 	}
+								// chatForCustomerArr.push({
+								// 	"chat_id" : chatDetails._id,
+								// 	"is_group" : true,
+								// 	"chat_with_data" : {
+								// 		"group_id" : groups._id,
+								// 		"name" : groups.title,
+								// 		"image" : groups.image,
+								// 		"totalMembers" : groups.members.length
+								// 	},
+								// 	"last_message_id" : chatDetails.last_message_id,
+								// 	"last_message" : {
+								// 		"message_body" : chatMessage.message_body,
+								// 		"message_time" : "" // chatMessage..time).getHours()
+								// 	}
+								// });
+								getLastMessage(chatDetails.last_message_id).then(function(res) {
+									console.log("res", res);
+									chatForCustomerArr.push({
+										"chat_id" : chatDetails._id,
+										"is_group" : true,
+										"chat_with_data" : {
+											"group_id" : groups._id,
+											"name" : groups.title,
+											"image" : groups.image,
+											"totalMembers" : groups.members.length
+										},
+										"last_message_id" : chatDetails.last_message_id,
+										"last_message" : {
+											"message_body" : res.message_body,
+											"message_time" : "" // chatMessage..time).getHours()
+										}
+									});
+									resolve('done'); 
 								});
-								resolve('done'); 
-							});
+								
+							// });
 						});
 				} else {
 					// getChatWithCustomers
@@ -97,38 +116,73 @@ exports.getCustomerChatInfo = function(req, res, next) {
 							reject('fail');
 						}
 						// getting last message
-						messagesData.findOne({
-							_id : mongoose.Types.ObjectId(chatDetails.last_message_id)
-						},{
-							message_body : 1,
-							_id : 0
-						},function(err, chatMessage) {
-							if(err || !chatMessage) {
-								reject('fail');
-							}
-							chatForCustomerArr.push({
-								"chat_id" : chatDetails._id,
-								"is_group" : false,
-								"chat_with_data" : {
-									"customer_id" : customer._id,
-									"name" : customer.name,
-									"image" : customer.profile_image
-								},
-								"last_message_id" : chatDetails.last_message_id,
-								"last_message" : {
-									"message_body" : chatMessage.message_body,
-									"message_time" : "" // chatMessage..time).getHours()
-								}
+						// messagesData.findOne({
+						// 	_id : mongoose.Types.ObjectId(chatDetails.last_message_id)
+						// },{
+						// 	message_body : 1,
+						// 	_id : 0
+						// },function(err, chatMessage) {
+						// 	if(err || !chatMessage) {
+						// 		reject('fail');
+						// 	}
+							// chatForCustomerArr.push({
+							// 	"chat_id" : chatDetails._id,
+							// 	"is_group" : false,
+							// 	"chat_with_data" : {
+							// 		"customer_id" : customer._id,
+							// 		"name" : customer.name,
+							// 		"image" : customer.profile_image
+							// 	},
+							// 	"last_message_id" : chatDetails.last_message_id,
+							// 	"last_message" : {
+							// 		"message_body" : chatMessage.message_body,
+							// 		"message_time" : "" // chatMessage..time).getHours()
+							// 	}
+							// });
+							getLastMessage(chatDetails.last_message_id).then(function(res) {
+								console.log("res", res);
+								chatForCustomerArr.push({
+									"chat_id" : chatDetails._id, 
+									"is_group" : false,
+									"chat_with_data" : {
+										"customer_id" : customer._id,
+										"name" : customer.name,
+										"image" : customer.profile_image
+									},
+									"last_message_id" : chatDetails.last_message_id,
+									"last_message" : {
+										"message_body" : res.message_body,
+										"message_time" : "" // chatMessage..time).getHours()
+									}
+								});
+
+								resolve('done'); 
 							});
-							resolve('done'); 
-						});	
+
+						// });	
 					})
 				}
 				});			
 			});		
 	}
-	// end doAsyncTask function calling
 
+	function getLastMessage(lastMessage) {
+		return new Promise(function(resolve, reject) {
+			messagesData.findOne({
+				_id : mongoose.Types.ObjectId(lastMessage)
+			},{
+				message_body : 1,
+				_id : 0
+			},function(err, chatMessage) {
+				if (err) {
+					return "";
+				}
+				resolve(chatMessage);
+			});	
+		});	
+	}
+
+	// end doAsyncTask function calling
 	customerData.findOne({
 		_id : mongoose.Types.ObjectId(req.params.customerid)
 	},function(err, customerChats) {
@@ -151,3 +205,4 @@ exports.getCustomerChatInfo = function(req, res, next) {
 			});
 	});
 }
+
